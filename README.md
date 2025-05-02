@@ -32,7 +32,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Install Neo4j on Ubuntu
+### 4. Neo4j Setup Options
+
+#### Option 1: Local Neo4j Installation (Ubuntu)
 
 1. Add the Neo4j repository and update package list:
 ```bash
@@ -66,26 +68,25 @@ sudo systemctl status neo4j
 sudo neo4j-admin set-initial-password your-password
 ```
 
-7. Configure Neo4j to accept remote connections (optional):
-```bash
-sudo nano /etc/neo4j/neo4j.conf
-```
-Find and uncomment these lines:
-```
-#server.default_listen_address=0.0.0.0
-#server.bolt.listen_address=:7687
-```
+#### Option 2: Neo4j Aura (Cloud Service)
 
-8. Restart Neo4j to apply changes:
-```bash
-sudo systemctl restart neo4j
-```
+1. Go to [Neo4j Aura](https://neo4j.com/cloud/aura/)
+2. Sign up for a free account
+3. Create a new database instance
+4. Note down the connection details:
+   - URI (bolt:// or neo4j://)
+   - Username (usually 'neo4j')
+   - Password
 
-9. Access Neo4j Browser:
-- Open your web browser and navigate to: `http://localhost:7474`
-- Login with:
-  - Username: `neo4j`
-  - Password: `your-password`
+#### Option 3: Neo4j Sandbox (Free Learning Environment)
+
+1. Go to [Neo4j Sandbox](https://sandbox.neo4j.com/)
+2. Sign up or log in
+3. Choose a sample dataset (e.g., "Movies", "Northwind", "Game of Thrones")
+4. Note down the connection details:
+   - URI (bolt:// or neo4j://)
+   - Username (usually 'neo4j')
+   - Password
 
 ## Usage
 
@@ -103,31 +104,65 @@ streamlit run Home.py
 ### Neo4j Connection Settings
 
 When using the Neo4j page, you'll need to provide:
-- URI: `bolt://localhost:7687`
+- URI: 
+  - Local: `bolt://localhost:7687`
+  - Aura/Sandbox: Use the provided URI
 - Username: `neo4j`
-- Password: `your-password`
+- Password: Use the password you set or was provided
+
+## Sample Queries for Neo4j Sandbox
+
+If you're using Neo4j Sandbox, try these sample queries:
+
+### Movies Database:
+```cypher
+// Find all movies Tom Hanks acted in
+MATCH (p:Person {name: 'Tom Hanks'})-[:ACTED_IN]->(m:Movie)
+RETURN m.title, m.released
+
+// Find all people who directed a movie
+MATCH (p:Person)-[:DIRECTED]->(m:Movie)
+RETURN p.name, m.title
+
+// Find all co-actors of Tom Hanks
+MATCH (p:Person {name: 'Tom Hanks'})-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]-(coActor:Person)
+RETURN coActor.name
+```
+
+### Northwind Database:
+```cypher
+// Find all products in a category
+MATCH (c:Category {categoryName: 'Beverages'})<-[:PART_OF]-(p:Product)
+RETURN p.productName, p.unitPrice
+
+// Find all orders for a customer
+MATCH (c:Customer {companyName: 'Alfreds Futterkiste'})<-[:PURCHASED]-(o:Order)
+RETURN o.orderID, o.orderDate
+```
 
 ## Troubleshooting
 
 If you encounter any issues:
 
-1. Check Neo4j service status:
+1. For local installation:
 ```bash
 sudo systemctl status neo4j
-```
-
-2. View Neo4j logs:
-```bash
 sudo journalctl -u neo4j
 ```
 
-3. Check if ports are in use:
+2. For Aura/Sandbox:
+- Check your internet connection
+- Verify the connection details
+- Try refreshing the database instance
+
+3. Common connection issues:
+- Check if ports are in use:
 ```bash
 sudo lsof -i :7474
 sudo lsof -i :7687
 ```
 
-4. If you need to stop Neo4j:
+4. If you need to stop local Neo4j:
 ```bash
 sudo systemctl stop neo4j
 ```
