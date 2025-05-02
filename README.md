@@ -1,6 +1,10 @@
 # Knowledge Graph Explorer
 
-A Streamlit application that demonstrates knowledge graph visualization using both open-source tools and Neo4j. The application provides interactive visualizations of graph data and allows users to explore different aspects of knowledge graphs.
+A Streamlit application for exploring and visualizing knowledge graphs using NetworkX and Neo4j.
+
+## Demo
+
+A live demo of this application is available at: [https://knowledge-graph-demo.streamlit.app/](https://knowledge-graph-demo.streamlit.app/)
 
 ## Features
 
