@@ -4,5 +4,6 @@ networkx==3.2.1
 matplotlib==3.8.2
 pyvis==0.3.2
 pandas==2.2.0
-numpy==1.26.3 
+numpy==1.26.3
 plotly
+openai>=1.0.0

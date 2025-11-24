@@ -1,6 +1,6 @@
 # Knowledge Graph Explorer
 
-A Streamlit application for exploring and visualizing knowledge graphs using NetworkX and Neo4j.
+A comprehensive Streamlit application for exploring and visualizing knowledge graphs using NetworkX and Neo4j, with advanced Cypher queries and AI-powered natural language to Cypher conversion.
 
 ## Demo
 
@@ -8,18 +8,32 @@ A live demo of this application is available at: [https://knowledge-graph-demo.s
 
 ## Features
 
-- Open-source knowledge graph visualization using NetworkX and Pyvis
-- Neo4j integration with sample movie database
-- Interactive graph visualization
-- Graph statistics and analytics
-- Sample queries and data exploration
+### Core Features
+- **Open-source knowledge graph visualization** using NetworkX and Pyvis
+- **Neo4j integration** with sample movie database
+- **Interactive graph visualization** with node and edge exploration
+- **Graph statistics and analytics** including centrality measures
+- **Sample queries and data exploration**
+
+### Advanced Features (NEW!)
+- **Advanced Cypher Queries**: 7 categories with 20+ pre-built complex queries
+  - Pattern Matching
+  - Path Finding
+  - Aggregations & Analytics
+  - Complex Relationships
+  - Graph Algorithms
+  - Temporal Queries
+  - Recommendation Queries
+- **AI Assistant (Text-to-Cypher)**: Convert natural language questions to Cypher queries using OpenAI
+- **Enhanced sample dataset** with movies, actors, directors, studios, characters, and themes
+- **Query history tracking** and result export capabilities
 
 ## Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/kaljuvee/knowledge-graph.git
 cd knowledge-graph
 ```
 
@@ -27,7 +41,7 @@ cd knowledge-graph
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
 ### 3. Install Python Dependencies
@@ -36,9 +50,20 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Neo4j Setup Options
+### 4. Configure Environment Variables (Optional)
 
-#### Option 1: Local Neo4j Installation (Ubuntu)
+For the AI Assistant feature, you'll need an OpenAI API key:
+
+```bash
+cp .env.example .env
+# Edit .env and add your OpenAI API key
+```
+
+Alternatively, you can enter the API key directly in the Streamlit UI.
+
+### 5. Neo4j Setup Options
+
+#### Option 1: Local Neo4j Installation (Ubuntu/Linux)
 
 1. Add the Neo4j repository and update package list:
 ```bash
@@ -72,7 +97,7 @@ sudo systemctl status neo4j
 sudo neo4j-admin set-initial-password your-password
 ```
 
-#### Option 2: Neo4j Aura (Cloud Service)
+#### Option 2: Neo4j Aura (Cloud Service - Recommended)
 
 1. Go to [Neo4j Aura](https://neo4j.com/cloud/aura/)
 2. Sign up for a free account
@@ -102,17 +127,77 @@ streamlit run Home.py
 2. Access the application in your web browser at: `http://localhost:8501`
 
 3. Navigate between pages:
-- Home: Open-source knowledge graph visualization
-- Neo4j: Neo4j-based knowledge graph exploration
+   - **Home**: Open-source knowledge graph visualization with NetworkX
+   - **Neo4j**: Basic Neo4j-based knowledge graph exploration
+   - **NetworkX**: NetworkX-specific graph operations
+   - **Advanced Cypher**: 20+ pre-built advanced Cypher queries
+   - **AI Assistant**: Natural language to Cypher query conversion
 
 ### Neo4j Connection Settings
 
-When using the Neo4j page, you'll need to provide:
-- URI: 
+When using the Neo4j pages, you'll need to provide:
+- **URI**: 
   - Local: `bolt://localhost:7687`
   - Aura/Sandbox: Use the provided URI
-- Username: `neo4j`
-- Password: Use the password you set or was provided
+- **Username**: `neo4j`
+- **Password**: Use the password you set or was provided
+
+### Using the AI Assistant
+
+1. Navigate to the **AI Assistant** page
+2. Connect to your Neo4j database
+3. Enter your OpenAI API key (or set it in `.env`)
+4. Ask questions in natural language, such as:
+   - "Show me all movies released after 2000"
+   - "Who are the actors in The Matrix?"
+   - "Which actors have worked together in multiple movies?"
+   - "What is the average rating of Sci-Fi movies?"
+
+The AI will automatically generate and execute the appropriate Cypher query!
+
+## Advanced Cypher Query Examples
+
+The **Advanced Cypher** page includes pre-built queries in these categories:
+
+### Pattern Matching
+```cypher
+// Find actors who worked together multiple times
+MATCH (p1:Person)-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]-(p2:Person)
+WHERE id(p1) < id(p2)
+WITH p1, p2, COUNT(DISTINCT m) as collaborations, COLLECT(m.title) as movies
+WHERE collaborations > 1
+RETURN p1.name, p2.name, collaborations, movies
+ORDER BY collaborations DESC
+```
+
+### Path Finding
+```cypher
+// Shortest path between two actors
+MATCH path = shortestPath(
+    (keanu:Person {name: 'Keanu Reeves'})-[*]-(laurence:Person {name: 'Laurence Fishburne'})
+)
+RETURN path, length(path) as pathLength
+```
+
+### Aggregations & Analytics
+```cypher
+// Total earnings per actor
+MATCH (p:Person)-[r:ACTED_IN]->(m:Movie)
+WITH p, SUM(r.salary) as totalEarnings, COUNT(m) as movieCount
+RETURN p.name, totalEarnings, movieCount
+ORDER BY totalEarnings DESC
+```
+
+### Recommendation Queries
+```cypher
+// Recommend movies based on actor preferences
+MATCH (p:Person {name: 'Keanu Reeves'})-[:ACTED_IN]->(m1:Movie)
+MATCH (m1)<-[:ACTED_IN]-(other:Person)-[:ACTED_IN]->(m2:Movie)
+WHERE NOT (p)-[:ACTED_IN]->(m2)
+RETURN m2.title, m2.genre, COUNT(*) as recommendations, COLLECT(DISTINCT other.name) as coActors
+ORDER BY recommendations DESC
+LIMIT 5
+```
 
 ## Sample Queries for Neo4j Sandbox
 
@@ -171,15 +256,24 @@ sudo lsof -i :7687
 sudo systemctl stop neo4j
 ```
 
+5. For AI Assistant issues:
+- Verify your OpenAI API key is valid
+- Check that you have sufficient API credits
+- Ensure the graph schema is loaded (connect to Neo4j first)
+
 ## Project Structure
 
 ```
 knowledge-graph/
-├── Home.py              # Main application with open-source visualization
+├── Home.py                      # Main application with open-source visualization
 ├── pages/
-│   └── Neo4j.py        # Neo4j integration and visualization
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
+│   ├── Neo4j.py                # Basic Neo4j integration and visualization
+│   ├── NetworkX.py             # NetworkX-specific operations
+│   ├── 3_Advanced_Cypher.py    # Advanced Cypher queries (NEW!)
+│   └── 4_AI_Assistant.py       # Text-to-Cypher AI assistant (NEW!)
+├── requirements.txt            # Python dependencies
+├── .env.example               # Environment variable template
+└── README.md                  # This file
 ```
 
 ## Dependencies
@@ -191,11 +285,38 @@ knowledge-graph/
 - pyvis==0.3.2
 - pandas==2.2.0
 - numpy==1.26.3
+- plotly
+- openai>=1.0.0
 
-## License
+## API Keys
 
-[Your chosen license]
+The AI Assistant requires an OpenAI API key. You can:
+1. Set it as an environment variable: `OPENAI_API_KEY`
+2. Add it to a `.env` file (copy from `.env.example`)
+3. Enter it directly in the Streamlit UI
+
+Get your API key from: [OpenAI Platform](https://platform.openai.com/api-keys)
+
+## Use Cases
+
+This application is ideal for:
+- **Learning Neo4j and Cypher**: Explore pre-built queries and see results instantly
+- **Graph Database Prototyping**: Test queries and visualize results before production
+- **Data Exploration**: Understand complex relationships in your data
+- **AI-Powered Querying**: Let non-technical users query graph databases using natural language
+- **Teaching and Demos**: Showcase graph database capabilities interactively
 
 ## Contributing
 
-[Your contribution guidelines]
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+MIT License - feel free to use this project for learning and development.
+
+## Acknowledgments
+
+- Built with [Streamlit](https://streamlit.io/)
+- Graph database powered by [Neo4j](https://neo4j.com/)
+- Visualization using [Pyvis](https://pyvis.readthedocs.io/) and [NetworkX](https://networkx.org/)
+- AI capabilities powered by [OpenAI](https://openai.com/)
