@@ -172,3 +172,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ChromaDB persistence
+chroma_db/
+
+# Generated data
+data/
