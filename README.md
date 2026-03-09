@@ -1,322 +1,140 @@
 # Knowledge Graph Explorer
 
-A comprehensive Streamlit application for exploring and visualizing knowledge graphs using NetworkX and Neo4j, with advanced Cypher queries and AI-powered natural language to Cypher conversion.
-
-## Demo
-
-A live demo of this application is available at: [https://knowledge-graph-demo.streamlit.app/](https://knowledge-graph-demo.streamlit.app/)
+A Streamlit application for exploring knowledge graphs with real movie data from TMDB. Compares three retrieval approaches — **Knowledge Graph** (Neo4j), **Vector Search** (ChromaDB), and **Hybrid** — with an evaluation framework demonstrating that a hybrid approach achieves the best accuracy.
 
 ## Features
 
-### Core Features
-- **Open-source knowledge graph visualization** using NetworkX and Pyvis
-- **Neo4j integration** with sample movie database
-- **Interactive graph visualization** with node and edge exploration
-- **Graph statistics and analytics** including centrality measures
-- **Sample queries and data exploration**
+### Data Pipeline
+- **TMDB Integration**: Fetch real movie data (cast, crew, genres, keywords) from the TMDB and OMDB APIs
+- **Neo4j Loading**: Automated graph construction with Movies, People, Genres, Production Companies, and Keywords
+- **Vector Indexing**: Embed movie overviews into ChromaDB using OpenAI `text-embedding-3-small`
 
-### Advanced Features (NEW!)
-- **Advanced Cypher Queries**: 7 categories with 20+ pre-built complex queries
-  - Pattern Matching
-  - Path Finding
-  - Aggregations & Analytics
-  - Complex Relationships
-  - Graph Algorithms
-  - Temporal Queries
-  - Recommendation Queries
-- **AI Assistant (Text-to-Cypher)**: Convert natural language questions to Cypher queries using OpenAI
-- **Enhanced sample dataset** with movies, actors, directors, studios, characters, and themes
-- **Query history tracking** and result export capabilities
+### Knowledge Graph
+- **Neo4j Queries**: Pre-built Cypher query library across 7 categories (pattern matching, path finding, aggregations, recommendations, etc.)
+- **Multi-Turn Conversational Cypher**: Chat-style interface where each question builds on previous context — ask follow-ups like "who directed those movies?" or "now filter by rating above 8"
+- **Text-to-Cypher AI Assistant**: Convert natural language to Cypher queries using OpenAI
 
-## Installation
+### Vector Search
+- **Semantic Movie Search**: Find movies by meaning, not keywords — "a dystopian future where machines control humans" finds The Matrix
+- **Keyword vs Semantic Comparison**: Side-by-side demonstration of why vector search outperforms keyword matching for thematic queries
+- **Similar Movies**: Find thematically similar movies via embedding distance
 
-### 1. Clone the Repository
+### Evaluation
+- **KG vs Vector vs Hybrid Benchmark**: Automated evaluation generating questions from actual graph data with ground truth answers
+- **Three question categories**: Factual (KG excels), Semantic (Vector excels), Complex (Hybrid excels)
+- **Recall scoring** with per-category breakdown and comparative visualizations
+
+### Visualization
+- **Interactive graph rendering** with Pyvis
+- **Plotly charts** for analytics and evaluation results
+- **NetworkX** graph algorithms (centrality, community detection)
+
+## Quick Start
 
 ```bash
 git clone https://github.com/kaljuvee/knowledge-graph.git
 cd knowledge-graph
-```
-
-### 2. Create and Activate Virtual Environment
-
-```bash
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-```
-
-### 3. Install Python Dependencies
-
-```bash
+source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-### 4. Configure Environment Variables (Optional)
-
-For the AI Assistant feature, you'll need an OpenAI API key:
-
-```bash
-cp .env.example .env
-# Edit .env and add your OpenAI API key
-```
-
-Alternatively, you can enter the API key directly in the Streamlit UI.
-
-### 5. Neo4j Setup Options
-
-#### Option 1: Local Neo4j Installation (Ubuntu/Linux)
-
-1. Add the Neo4j repository and update package list:
-```bash
-wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
-echo 'deb https://debian.neo4j.com stable 4.1' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
-sudo apt-get update
-```
-
-2. Install Neo4j:
-```bash
-sudo apt-get install neo4j
-```
-
-3. Start Neo4j service:
-```bash
-sudo systemctl start neo4j
-```
-
-4. Enable Neo4j to start on boot:
-```bash
-sudo systemctl enable neo4j
-```
-
-5. Check Neo4j status:
-```bash
-sudo systemctl status neo4j
-```
-
-6. Set initial password (replace 'your-password' with your desired password):
-```bash
-sudo neo4j-admin set-initial-password your-password
-```
-
-#### Option 2: Neo4j Aura (Cloud Service - Recommended)
-
-1. Go to [Neo4j Aura](https://neo4j.com/cloud/aura/)
-2. Sign up for a free account
-3. Create a new database instance
-4. Note down the connection details:
-   - URI (bolt:// or neo4j://)
-   - Username (usually 'neo4j')
-   - Password
-
-#### Option 3: Neo4j Sandbox (Free Learning Environment)
-
-1. Go to [Neo4j Sandbox](https://sandbox.neo4j.com/)
-2. Sign up or log in
-3. Choose a sample dataset (e.g., "Movies", "Northwind", "Game of Thrones")
-4. Note down the connection details:
-   - URI (bolt:// or neo4j://)
-   - Username (usually 'neo4j')
-   - Password
-
-## Usage
-
-1. Start the Streamlit application:
-```bash
+cp .env.example .env   # Edit with your API keys
 streamlit run Home.py
 ```
 
-2. Access the application in your web browser at: `http://localhost:8501`
+## Configuration
 
-3. Navigate between pages:
-   - **Home**: Open-source knowledge graph visualization with NetworkX
-   - **Neo4j**: Basic Neo4j-based knowledge graph exploration
-   - **NetworkX**: NetworkX-specific graph operations
-   - **Advanced Cypher**: 20+ pre-built advanced Cypher queries
-   - **AI Assistant**: Natural language to Cypher query conversion
+Copy `.env.example` to `.env` and set:
 
-### Neo4j Connection Settings
+| Variable | Required For | Description |
+|----------|-------------|-------------|
+| `OPENAI_API_KEY` | AI Assistant, Vector Search, Evaluation | OpenAI API key ([get one here](https://platform.openai.com/api-keys)) |
+| `TMDB_API_KEY` | Data Pipeline | TMDB API key ([get one here](https://www.themoviedb.org/settings/api)) |
+| `OMDB_API_KEY` | Data Pipeline (optional) | OMDB API key for supplementary ratings |
+| `AURA_NEO4J_URI` | Neo4j pages | Neo4j Aura connection URI (e.g., `neo4j+s://xxxxx.databases.neo4j.io`) |
+| `AURORA_NEO4J_USER` | Neo4j pages | Neo4j Aura username |
+| `AURORA_NEO4J_PASSWORD` | Neo4j pages | Neo4j Aura password |
 
-When using the Neo4j pages, you'll need to provide:
-- **URI**: 
-  - Local: `bolt://localhost:7687`
-  - Aura/Sandbox: Use the provided URI
-- **Username**: `neo4j`
-- **Password**: Use the password you set or was provided
+For local Neo4j, set `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` instead.
 
-### Using the AI Assistant
+## Neo4j Setup
 
-1. Navigate to the **AI Assistant** page
-2. Connect to your Neo4j database
-3. Enter your OpenAI API key (or set it in `.env`)
-4. Ask questions in natural language, such as:
-   - "Show me all movies released after 2000"
-   - "Who are the actors in The Matrix?"
-   - "Which actors have worked together in multiple movies?"
-   - "What is the average rating of Sci-Fi movies?"
+### Option 1: Neo4j Aura (Recommended)
+1. Sign up at [Neo4j Aura](https://neo4j.com/cloud/aura/) (free tier available)
+2. Create a database instance
+3. Add the connection URI, username, and password to `.env`
 
-The AI will automatically generate and execute the appropriate Cypher query!
-
-## Advanced Cypher Query Examples
-
-The **Advanced Cypher** page includes pre-built queries in these categories:
-
-### Pattern Matching
-```cypher
-// Find actors who worked together multiple times
-MATCH (p1:Person)-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]-(p2:Person)
-WHERE id(p1) < id(p2)
-WITH p1, p2, COUNT(DISTINCT m) as collaborations, COLLECT(m.title) as movies
-WHERE collaborations > 1
-RETURN p1.name, p2.name, collaborations, movies
-ORDER BY collaborations DESC
-```
-
-### Path Finding
-```cypher
-// Shortest path between two actors
-MATCH path = shortestPath(
-    (keanu:Person {name: 'Keanu Reeves'})-[*]-(laurence:Person {name: 'Laurence Fishburne'})
-)
-RETURN path, length(path) as pathLength
-```
-
-### Aggregations & Analytics
-```cypher
-// Total earnings per actor
-MATCH (p:Person)-[r:ACTED_IN]->(m:Movie)
-WITH p, SUM(r.salary) as totalEarnings, COUNT(m) as movieCount
-RETURN p.name, totalEarnings, movieCount
-ORDER BY totalEarnings DESC
-```
-
-### Recommendation Queries
-```cypher
-// Recommend movies based on actor preferences
-MATCH (p:Person {name: 'Keanu Reeves'})-[:ACTED_IN]->(m1:Movie)
-MATCH (m1)<-[:ACTED_IN]-(other:Person)-[:ACTED_IN]->(m2:Movie)
-WHERE NOT (p)-[:ACTED_IN]->(m2)
-RETURN m2.title, m2.genre, COUNT(*) as recommendations, COLLECT(DISTINCT other.name) as coActors
-ORDER BY recommendations DESC
-LIMIT 5
-```
-
-## Sample Queries for Neo4j Sandbox
-
-If you're using Neo4j Sandbox, try these sample queries:
-
-### Movies Database:
-```cypher
-// Find all movies Tom Hanks acted in
-MATCH (p:Person {name: 'Tom Hanks'})-[:ACTED_IN]->(m:Movie)
-RETURN m.title, m.released
-
-// Find all people who directed a movie
-MATCH (p:Person)-[:DIRECTED]->(m:Movie)
-RETURN p.name, m.title
-
-// Find all co-actors of Tom Hanks
-MATCH (p:Person {name: 'Tom Hanks'})-[:ACTED_IN]->(m:Movie)<-[:ACTED_IN]-(coActor:Person)
-RETURN coActor.name
-```
-
-### Northwind Database:
-```cypher
-// Find all products in a category
-MATCH (c:Category {categoryName: 'Beverages'})<-[:PART_OF]-(p:Product)
-RETURN p.productName, p.unitPrice
-
-// Find all orders for a customer
-MATCH (c:Customer {companyName: 'Alfreds Futterkiste'})<-[:PURCHASED]-(o:Order)
-RETURN o.orderID, o.orderDate
-```
-
-## Troubleshooting
-
-If you encounter any issues:
-
-1. For local installation:
+### Option 2: Local Neo4j
 ```bash
-sudo systemctl status neo4j
-sudo journalctl -u neo4j
+# Ubuntu/Linux
+wget -O - https://debian.neo4j.com/neotechnology.gpg.key | sudo apt-key add -
+echo 'deb https://debian.neo4j.com stable 4.1' | sudo tee -a /etc/apt/sources.list.d/neo4j.list
+sudo apt-get update && sudo apt-get install neo4j
+sudo systemctl start neo4j
 ```
 
-2. For Aura/Sandbox:
-- Check your internet connection
-- Verify the connection details
-- Try refreshing the database instance
+## Workflow
 
-3. Common connection issues:
-- Check if ports are in use:
-```bash
-sudo lsof -i :7474
-sudo lsof -i :7687
-```
-
-4. If you need to stop local Neo4j:
-```bash
-sudo systemctl stop neo4j
-```
-
-5. For AI Assistant issues:
-- Verify your OpenAI API key is valid
-- Check that you have sufficient API credits
-- Ensure the graph schema is loaded (connect to Neo4j first)
+1. **Fetch Data** (page 5): Pull movies from TMDB API
+2. **Load to Neo4j** (page 5): Build the knowledge graph
+3. **Index to ChromaDB** (page 5): Embed movie overviews for vector search
+4. **Explore**: Use Conversational Cypher (page 6), Vector Search (page 7), or the original query pages
+5. **Evaluate** (page 8): Run the benchmark comparing KG vs Vector vs Hybrid retrieval
 
 ## Project Structure
 
 ```
 knowledge-graph/
-├── Home.py                      # Main application with open-source visualization
+├── Home.py                              # Entry point — sample NetworkX visualization
 ├── pages/
-│   ├── Neo4j.py                # Basic Neo4j integration and visualization
-│   ├── NetworkX.py             # NetworkX-specific operations
-│   ├── 3_Advanced_Cypher.py    # Advanced Cypher queries (NEW!)
-│   └── 4_AI_Assistant.py       # Text-to-Cypher AI assistant (NEW!)
-├── requirements.txt            # Python dependencies
-├── .env.example               # Environment variable template
-└── README.md                  # This file
+│   ├── Neo4j.py                         # Basic Neo4j queries
+│   ├── NetworkX.py                      # Business network analysis
+│   ├── 3_Advanced_Cypher.py             # Pre-built Cypher query library
+│   ├── 4_AI_Assistant.py                # Single-turn text-to-Cypher
+│   ├── 5_TMDB_Data.py                   # TMDB data pipeline
+│   ├── 6_Conversational_Cypher.py       # Multi-turn conversational Cypher
+│   ├── 7_Vector_Search.py              # ChromaDB semantic search
+│   └── 8_Evaluation.py                 # KG vs Vector vs Hybrid benchmark
+├── utils/
+│   ├── config.py                        # Environment config (dotenv)
+│   ├── tmdb_client.py                   # TMDB API client
+│   ├── neo4j_utils.py                   # Neo4j connection, queries, data loading
+│   └── openai_utils.py                  # OpenAI embeddings and chat
+├── docs/
+│   ├── architecture_readme.md           # Architecture with Mermaid diagrams
+│   └── knowledge-graph-summary.md       # Feature summary
+├── requirements.txt
+├── .env.example
+└── CLAUDE.md
 ```
+
+## Data Model
+
+The Neo4j knowledge graph uses TMDB data with the following schema:
+
+**Nodes**: `Movie`, `Person`, `Genre`, `ProductionCompany`, `Keyword`
+
+**Relationships**: `ACTED_IN` (character, credit_order), `DIRECTED`, `IN_GENRE`, `PRODUCED_BY`, `HAS_KEYWORD`
+
+See [docs/architecture_readme.md](docs/architecture_readme.md) for full ER diagrams, data pipeline flowcharts, and a detailed comparison of retrieval strategies.
 
 ## Dependencies
 
-- streamlit==1.32.0
-- neo4j==5.17.0
-- networkx==3.2.1
-- matplotlib==3.8.2
-- pyvis==0.3.2
-- pandas==2.2.0
-- numpy==1.26.3
-- plotly
-- openai>=1.0.0
-
-## API Keys
-
-The AI Assistant requires an OpenAI API key. You can:
-1. Set it as an environment variable: `OPENAI_API_KEY`
-2. Add it to a `.env` file (copy from `.env.example`)
-3. Enter it directly in the Streamlit UI
-
-Get your API key from: [OpenAI Platform](https://platform.openai.com/api-keys)
-
-## Use Cases
-
-This application is ideal for:
-- **Learning Neo4j and Cypher**: Explore pre-built queries and see results instantly
-- **Graph Database Prototyping**: Test queries and visualize results before production
-- **Data Exploration**: Understand complex relationships in your data
-- **AI-Powered Querying**: Let non-technical users query graph databases using natural language
-- **Teaching and Demos**: Showcase graph database capabilities interactively
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+- **Web**: Streamlit
+- **Graph DB**: Neo4j
+- **Vector DB**: ChromaDB
+- **AI**: OpenAI (embeddings + LLM)
+- **Data**: TMDB/OMDB APIs, Pandas
+- **Visualization**: Pyvis, Plotly, Matplotlib, NetworkX
 
 ## License
 
-MIT License - feel free to use this project for learning and development.
+Apache License 2.0
 
 ## Acknowledgments
 
-- Built with [Streamlit](https://streamlit.io/)
-- Graph database powered by [Neo4j](https://neo4j.com/)
-- Visualization using [Pyvis](https://pyvis.readthedocs.io/) and [NetworkX](https://networkx.org/)
-- AI capabilities powered by [OpenAI](https://openai.com/)
+- [Streamlit](https://streamlit.io/) — Web framework
+- [Neo4j](https://neo4j.com/) — Graph database
+- [ChromaDB](https://www.trychroma.com/) — Vector database
+- [OpenAI](https://openai.com/) — Embeddings and LLM
+- [TMDB](https://www.themoviedb.org/) — Movie data
+- [Pyvis](https://pyvis.readthedocs.io/) / [NetworkX](https://networkx.org/) — Graph visualization
